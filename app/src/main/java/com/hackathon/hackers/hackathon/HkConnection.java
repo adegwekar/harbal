@@ -5,22 +5,24 @@ import android.util.Log;
 
 
 public class HkConnection implements HKWirelessListener {
-    static final String LOG_TAG="hackathon";
+    static final String LOG_TAG="HarBalHkConnection";
 
-    public HkConnection() {
-        HKWirelessHandler hControlHandler = new HKWirelessHandler();
+    public HkConnection(HKWirelessHandler hControlHandler) {
+        hControlHandler.registerHKWirelessControllerListener(this);
 
-        // Initialize the HKWControlHandler and start wireless audio
-        if (hControlHandler.initializeHKWirelessController("2FA8-2FD6-C27D-47E8-A256-D011-3751-2BD6") != 0) {
-            Log.d(LOG_TAG, "Invalid license key");
-        }
+        hControlHandler.startRefreshDeviceInfo();
+
         if (hControlHandler.isInitialized()) {
             int deviceCount = hControlHandler.getDeviceCount();
             Log.d(LOG_TAG, "HK device count: " + deviceCount);
 
             for (int i = 0; i < deviceCount; i++) {
                 DeviceObj DeviceInfo = hControlHandler.getDeviceInfoByIndex(i);
+                GroupObj group = hControlHandler.getDeviceGroupById(3168432876L);
+                Log.d(LOG_TAG, "Group Name: " + group.groupName);
+
                 if (DeviceInfo != null) {
+                    Log.d(LOG_TAG, "--- Device information ---");
                     Log.d(LOG_TAG, "name :" + DeviceInfo.deviceName);
                     Log.d(LOG_TAG, "ipAddress :" + DeviceInfo.ipAddress);
                     Log.d(LOG_TAG, "volume :" + DeviceInfo.volume);
@@ -36,29 +38,51 @@ public class HkConnection implements HKWirelessListener {
                     Log.d(LOG_TAG, "isPlaying :" + DeviceInfo.isPlaying);
                     Log.d(LOG_TAG, "channelType :" + DeviceInfo.channelType);
                     Log.d(LOG_TAG, "isMaster :" + DeviceInfo.isMaster);
+                    Log.d(LOG_TAG, "groupName :" + DeviceInfo.groupName);
+                    Log.d(LOG_TAG, "groupId :" + DeviceInfo.groupId);
+                    Log.d(LOG_TAG, "deviceId :" + DeviceInfo.deviceId);
+                    Log.d(LOG_TAG, "-----------------------");
+                    if (DeviceInfo.deviceId != 31684328765616L) {
+                        hControlHandler.removeDeviceFromSession(DeviceInfo.deviceId);
+                    }
+
+                    //hControlHandler.addDeviceToSession(i);
+                    //AudioCodecHandler hAudioControl = new AudioCodecHandler();
+                    //hAudioControl.playWAV("/sdcard/Music/applause.wav");
                 } else {
                     Log.d(LOG_TAG, "Failed to get device info for device: " + i);
                 }
+            }
+
+            if (hControlHandler.isDeviceActive(31684328765616L)) {
+                hControlHandler.addDeviceToSession(31684328765616L);
+                AudioCodecHandler hAudioControl = new AudioCodecHandler();
+                Log.d(LOG_TAG, "Device 31684328765616L isPlaying: " + hAudioControl.isPlaying());
+                hAudioControl.playCAF("/sdcard/Music/MozartPresto.mp3", "Mozart Presto", false);
+                //hAudioControl.playWAV("/sdcard/Music/applause.wav");
+                Log.d(LOG_TAG, "Device 31684328765616L isPlaying: " + hAudioControl.isPlaying());
             }
         }
     }
 
     public void onDeviceStateUpdated(long deviceId, int reason){
-
+        if (deviceId == 31684328765616L) {
+            Log.d(LOG_TAG, "Device " + deviceId + " state updated due to: " + reason);
+        }
     }
     public void onPlaybackStateChanged(int playState){
-
+        Log.d(LOG_TAG, "Playback state: " + playState);
     }
     public void onVolumeLevelChanged(long deviceId, int deviceVolume, int avgVolume){
 
     }
     public void onPlayEnded(){
-
+        Log.d(LOG_TAG, "Play ended");
     }
     public void onPlaybackTimeChanged(int timeElapsed){
 
     }
     public void onErrorOccurred(int errorCode, String errorMesg){
-
+        Log.e(LOG_TAG, "Error " + errorCode + ": " + errorMesg);
     }
 }
