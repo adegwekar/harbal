@@ -1,4 +1,4 @@
-# Built application files
+lt application files
 *.apk
 *.ap_
 
@@ -25,3 +25,8 @@ proguard/
 
 # Log Files
 *.log
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
