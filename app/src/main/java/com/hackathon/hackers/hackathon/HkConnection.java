@@ -10,7 +10,7 @@ public class HkConnection implements HKWirelessListener {
     public HkConnection(HKWirelessHandler hControlHandler) {
         hControlHandler.registerHKWirelessControllerListener(this);
 
-        hControlHandler.startRefreshDeviceInfo();
+        //hControlHandler.startRefreshDeviceInfo();
 
         if (hControlHandler.isInitialized()) {
             int deviceCount = hControlHandler.getDeviceCount();
@@ -18,8 +18,6 @@ public class HkConnection implements HKWirelessListener {
 
             for (int i = 0; i < deviceCount; i++) {
                 DeviceObj DeviceInfo = hControlHandler.getDeviceInfoByIndex(i);
-                GroupObj group = hControlHandler.getDeviceGroupById(3168432876L);
-                Log.d(LOG_TAG, "Group Name: " + group.groupName);
 
                 if (DeviceInfo != null) {
                     Log.d(LOG_TAG, "--- Device information ---");
@@ -44,6 +42,7 @@ public class HkConnection implements HKWirelessListener {
                     Log.d(LOG_TAG, "-----------------------");
                     if (DeviceInfo.deviceId != 31684328765616L) {
                         hControlHandler.removeDeviceFromSession(DeviceInfo.deviceId);
+                        Log.d(LOG_TAG, "Removed " + DeviceInfo.deviceId + " from session");
                     }
 
                     //hControlHandler.addDeviceToSession(i);
@@ -54,14 +53,16 @@ public class HkConnection implements HKWirelessListener {
                 }
             }
 
-            if (hControlHandler.isDeviceActive(31684328765616L)) {
+            //if (hControlHandler.isDeviceActive(31684328765616L)) {
                 hControlHandler.addDeviceToSession(31684328765616L);
                 AudioCodecHandler hAudioControl = new AudioCodecHandler();
                 Log.d(LOG_TAG, "Device 31684328765616L isPlaying: " + hAudioControl.isPlaying());
                 hAudioControl.playCAF("/sdcard/Music/MozartPresto.mp3", "Mozart Presto", false);
                 //hAudioControl.playWAV("/sdcard/Music/applause.wav");
                 Log.d(LOG_TAG, "Device 31684328765616L isPlaying: " + hAudioControl.isPlaying());
-            }
+                hAudioControl.stop();
+                hControlHandler.removeDeviceFromSession(31684328765616L);
+            //}
         }
     }
 
